@@ -77,13 +77,13 @@ pub fn derive_from_password(
     let hash_hex = hex::encode(bytes.to_vec());
     let hash_length = hash_hex.chars().count();
 
-    let dhkEnd = hash_length / 2;
+    let dhk_end = hash_length / 2;
 
-    let key = hash_hex.substring(0, dhkEnd).to_string();
-    let hmac = hash_hex.substring(dhkEnd, hash_length).to_string();
+    let key = hash_hex.substring(0, dhk_end).to_string();
+    let hmac = hash_hex.substring(dhk_end, hash_length).to_string();
 
-    let key_raw_res = hex::decode(key);
-    let hmac_raw_res = hex::decode(hmac);
+    let key_raw_res = hex::decode(key.clone());
+    let hmac_raw_res = hex::decode(hmac.clone());
 
     if key_raw_res.is_err() || hmac_raw_res.is_err() {
         return Err(DeriveError::InvalidHex);
@@ -102,11 +102,11 @@ pub fn derive_from_password(
         bits: bits / 8,
         rounds,
 
-        hex_hmac: hmac,
+        hex_hmac: hmac.clone(),
         hex_raw_hmac: array_to_pass(hmac.as_bytes().iter()),
         raw_hmac: hmac_bytes,
 
-        hex_key: key,
+        hex_key: key.clone(),
         hex_raw_key: array_to_pass(key.as_bytes().iter()),
         raw_key: key_bytes,
     };
