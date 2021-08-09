@@ -41,10 +41,12 @@ version = "0.1.0"
 dependencies = [
  "base64",
  "hex",
+ "hmac",
  "libaes",
  "pbkdf2",
  "rand",
  "rand_core",
+ "sha2",
  "substring",
 ]
 
