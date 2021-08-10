@@ -5,3 +5,4 @@ pub const IV_LENGTH: usize = 16;
 pub const SALT_LENGTH: usize = 12;
 pub const FF_AS_NUMBER: u8 = 255;
 pub const ENCRYPTION_METHOD: &str = "cbc";
+pub const IDENTIFIER: &str = "AES_PASS_ENCRYPTOR";
