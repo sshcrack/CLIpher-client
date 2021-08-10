@@ -17,12 +17,14 @@ pub fn get_hmac<'a>(input: HmacInput<'a>) -> Result<String, Box<dyn Error>> {
 
     let mut tool = hmac_tool_res.unwrap();
 
+    println!("Hashing with {} {}", input.iv, input.salt);
     tool.update(input.encrypted.as_bytes());
     tool.update(input.iv.as_bytes());
     tool.update(input.salt.as_bytes());
 
     let out_bytes = tool.finalize().into_bytes();
     let hex = hex::encode(out_bytes);
+    println!("Hex {}", hex);
     return Ok(hex);
 }
 

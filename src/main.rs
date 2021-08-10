@@ -1,28 +1,29 @@
-mod generators;
-mod encryption;
 mod constants;
-mod packager;
+mod encryption;
 mod error;
+mod generators;
+mod packager;
 mod utils;
 
 use encryption::aes;
 
-use crate::packager::{unpackage_components};
-
 fn main() {
-    let res = aes::encrypt_text("My Text", "h");
-    match res {
-        Ok(res) => {
-            let packaged = res.clone();
-            let expected_res = unpackage_components(str);
+    let password = "h";
 
-            if expected_res.is_err() {
-                return println!("Error occurred: {:#?}", expected_res.unwrap_err());
+    let encrypt_res = aes::encrypt_text("My Text", password, None, None);
+    match encrypt_res {
+        Ok(encr_res) => {
+            println!("Encrypted {}", encr_res);
+            let decrypt_res = aes::decrypt_text(&encr_res, password);
+            match decrypt_res {
+                Ok(decrypt_text) => {
+                    print!("Decrypted text: {}", decrypt_text);
+                }
+                Err(err) => {
+                    println!("Oh no, error {:#?}", err);
+                }
             }
-
-            let expected = expected_res.unwrap();
-            println!("Res, {:#?} is same {}\nThis: {} Expected: {}", res, packaged == expected, res.encrypted, expected.encrypted)
-        },
+        }
         Err(err) => {
             println!("Oh no, error {:#?}", err);
         }
@@ -31,10 +32,46 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        encryption::aes::{decrypt_text, encrypt_text},
+        packager::unpackage_components,
+    };
+    const SERVER_SAMPLE: &str = "JEFFU19QQVNTX0VOQ1JZUFRPUiRjYmMsYWM2ZGZkMWMwNmRjN2U5ZWQyOGIxZmMxMTY0YWIzZmU3YzA2MmExYWQ1NmNkZWQ1ZGU0Y2Y4Y2IxMDUwY2Q2NixjMzlhYWU0MjI0MWI2ZjVjNDA1ZjZmNTA2OGFiMjgyZixjQWFuTHAzNkxRMDMsMjAwMDAwJHdqUkxZOXBTbE5BU210a082SS9ZOGc9PQ==";
+    const PASSWORD: &str = "h";
+    const TEXT: &str = "My Text";
+
     #[test]
     fn encrypt() {
-        let server_sample = "$AES_PASS_ENCRYPTOR$cbc,ac6dfd1c06dc7e9ed28b1fc1164ab3fe7c062a1ad56cded5de4cf8cb1050cd66,c39aae42241b6f5c405f6f5068ab282f,cAanLp36LQ03,200000$wjRLY9pSlNASmtkO6I/Y8g==";
+        let unwrapped_res = unpackage_components(SERVER_SAMPLE);
 
-        assert_eq!(2 + 2, 4);
+        assert!(unwrapped_res.is_ok(), "Could not unpackage components");
+        let unwrapped = unwrapped_res.unwrap();
+
+        let res = encrypt_text(TEXT, PASSWORD, Some(unwrapped.salt), Some(unwrapped.iv));
+        assert!(
+            res.is_ok(),
+            "Could not encrypt text. Error: {:#?}",
+            res.unwrap_err()
+        );
+
+        let unwrapped_res = res.unwrap();
+        assert_eq!(
+            SERVER_SAMPLE, unwrapped_res,
+            "Sample and generated are not the same."
+        );
+    }
+
+    #[test]
+    fn decrypt() {
+        let decrypt_res = decrypt_text(SERVER_SAMPLE, PASSWORD);
+
+        assert!(
+            decrypt_res.is_ok(),
+            "Could not decrypt text. Error: {:#?}",
+            decrypt_res.unwrap_err()
+        );
+
+        let decrypted = decrypt_res.unwrap();
+        assert_eq!(TEXT, decrypted, "Decrypted text does not match.");
     }
 }

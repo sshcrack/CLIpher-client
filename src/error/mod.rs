@@ -1,4 +1,5 @@
 pub mod encryption;
+pub mod decryption;
 pub mod packager;
 pub mod hmac;
 pub mod derive;

@@ -1,16 +1,22 @@
 use std::error::Error;
+use std::str;
 use crate::constants::*;
 use crate::error::packager::*;
 
 
-#[allow(dead_code)]
 pub fn package_components(components: PackageComponents) -> String {
     let PackageComponents { method, hmac, iv, salt, rounds, encrypted } = components;
 
-    return format!("${}${},{},{},{},{}${}", IDENTIFIER, method, hmac, iv, salt, rounds, encrypted).to_string()
+    let formatted = format!("${}${},{},{},{},{}${}", IDENTIFIER, method, hmac, iv, salt, rounds, encrypted);
+    return base64::encode(formatted.as_bytes());
 }
 
-pub fn unpackage_components(raw: &str) -> Result<PackageComponents, Box<dyn Error>> {
+//Will be later used for decryption
+#[allow(dead_code)]
+pub fn unpackage_components(base: &str) -> Result<PackageComponents, Box<dyn Error>> {
+    let raw_bytes = base64::decode(base)?;
+    let raw = str::from_utf8(&raw_bytes)?;
+
     if !raw.starts_with("$") {
         return Err(Box::new(
             PackageError {
