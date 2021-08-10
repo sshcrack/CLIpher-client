@@ -10,7 +10,6 @@ use encryption::aes;
 use crate::packager::{unpackage_components};
 
 fn main() {
-    let str = "$AES_PASS_ENCRYPTOR$cbc,ac6dfd1c06dc7e9ed28b1fc1164ab3fe7c062a1ad56cded5de4cf8cb1050cd66,c39aae42241b6f5c405f6f5068ab282f,cAanLp36LQ03,200000$wjRLY9pSlNASmtkO6I/Y8g==";
     let res = aes::encrypt_text("My Text", "h");
     match res {
         Ok(res) => {
@@ -22,11 +21,20 @@ fn main() {
             }
 
             let expected = expected_res.unwrap();
-            println!("Original: {:#?}", expected);
             println!("Res, {:#?} is same {}\nThis: {} Expected: {}", res, packaged == expected, res.encrypted, expected.encrypted)
         },
         Err(err) => {
             println!("Oh no, error {:#?}", err);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn encrypt() {
+        let server_sample = "$AES_PASS_ENCRYPTOR$cbc,ac6dfd1c06dc7e9ed28b1fc1164ab3fe7c062a1ad56cded5de4cf8cb1050cd66,c39aae42241b6f5c405f6f5068ab282f,cAanLp36LQ03,200000$wjRLY9pSlNASmtkO6I/Y8g==";
+
+        assert_eq!(2 + 2, 4);
     }
 }

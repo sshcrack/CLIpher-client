@@ -7,7 +7,7 @@ use sha2::Sha256;
 use std::error::Error;
 
 type HmacSha256 = Hmac<Sha256>;
-pub fn getHMAC<'a>(input: HmacInput<'a>) -> Result<String, Box<dyn Error>> {
+pub fn get_hmac<'a>(input: HmacInput<'a>) -> Result<String, Box<dyn Error>> {
     let hmac_tool_res = HmacSha256::new_from_slice(input.key);
     if hmac_tool_res.is_err() {
         return Err(Box::new(HMACError {
@@ -15,7 +15,7 @@ pub fn getHMAC<'a>(input: HmacInput<'a>) -> Result<String, Box<dyn Error>> {
         }));
     }
 
-    let tool = hmac_tool_res.unwrap();
+    let mut tool = hmac_tool_res.unwrap();
 
     tool.update(input.encrypted.as_bytes());
     tool.update(input.iv.as_bytes());
@@ -28,14 +28,14 @@ pub fn getHMAC<'a>(input: HmacInput<'a>) -> Result<String, Box<dyn Error>> {
 
 pub struct HmacInput<'a> {
     /* HMAC Array */
-    key: &'a [u8; PASSWORD_KEY_SIZE],
+    pub key: &'a [u8; PASSWORD_KEY_SIZE],
 
     /*The encrypted content */
-    encrypted: &'a str,
+    pub encrypted: &'a str,
 
     /* Initialization Vector as Hex */
-    iv: &'a str,
+    pub iv: &'a str,
 
     /* The Salt as plain text */
-    salt: &'a str,
+    pub salt: &'a str,
 }

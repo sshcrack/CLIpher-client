@@ -3,6 +3,7 @@ use crate::constants::*;
 use crate::error::packager::*;
 
 
+#[allow(dead_code)]
 pub fn package_components(components: PackageComponents) -> String {
     let PackageComponents { method, hmac, iv, salt, rounds, encrypted } = components;
 

@@ -2,7 +2,9 @@ use rand::{Rng, thread_rng};
 
 use crate::constants::*;
 
+#[allow(dead_code)]
 pub type IvArr = [u8; IV_LENGTH];
+#[allow(dead_code)]
 pub fn generate_iv() -> IvArr {
     let mut rng = thread_rng();
 
