@@ -1,33 +1,65 @@
+use std::collections::HashMap;
+
+use encryption::rsa;
+use reqwest::Client;
+use serde_json::Value;
+use std::error::Error;
+use tokio::runtime::Runtime;
+
+use crate::api_structures::EncryptionKey;
+
+mod api_structures;
 mod constants;
 mod encryption;
+mod enums;
 mod error;
 mod generators;
 mod packager;
 mod utils;
 
-use encryption::aes;
-
 fn main() {
-    let password = "h";
+    let mut rt = Runtime::new().unwrap();
+    let future = app();
+    rt.block_on(future);
+}
 
-    let encrypt_res = aes::encrypt_text("My Text", password, None, None);
-    match encrypt_res {
-        Ok(encr_res) => {
-            println!("Encrypted {}", encr_res);
-            let decrypt_res = aes::decrypt_text(&encr_res, password);
-            match decrypt_res {
-                Ok(decrypt_text) => {
-                    print!("Decrypted text: {}", decrypt_text);
-                }
-                Err(err) => {
-                    println!("Oh no, error {:#?}", err);
-                }
-            }
-        }
-        Err(err) => {
-            println!("Oh no, error {:#?}", err);
-        }
+async fn app() -> Result<(), Box<dyn Error>> {
+    let username = "sshcrack";
+    let client = Client::default();
+    let mut body = HashMap::new();
+    body.insert("username", username);
+
+    let text = client
+        .post("http://localhost:3000/api/register/getEncryptionKey")
+        .json(&body)
+        .send()
+        .await?
+        .text()
+        .await?;
+
+    let json: Value = serde_json::from_str(&text)?;
+    let err = json["message"].as_str();
+
+    if err.is_some() {
+        println!("Error getting encryption key {}", err.unwrap());
+        return Ok(());
     }
+
+    let res: EncryptionKey = serde_json::from_value(json)?;
+    let key = res.public_key;
+
+    let encrypted = rsa::encrypt(&key, "Test hehe")?;
+    let hex_encrypted = hex::encode(encrypted);
+
+    println!("Encrypted hex {}", hex_encrypted);
+    let url = format!(
+        "http://localhost:3000/api/rsa?username={}&hex={}",
+        username, hex_encrypted
+    );
+    let decrypt_text = client.get(url).send().await?.text().await?;
+
+    println!("Decrypted {}", decrypt_text);
+    return Ok(());
 }
 
 #[cfg(test)]

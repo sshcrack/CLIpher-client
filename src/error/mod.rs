@@ -1,3 +1,4 @@
+pub mod string_err;
 pub mod encryption;
 pub mod decryption;
 pub mod packager;
